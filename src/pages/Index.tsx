@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Search, User, LogOut, Crown, Film, Download, Filter, SlidersHorizontal, ArrowUpDown, X, Clock, TrendingUp, Star, Calendar } from 'lucide-react';
+import { Search, User, LogOut, Crown, Film, Download, Filter, SlidersHorizontal, ArrowUpDown, X, Clock, TrendingUp, Star, Calendar, Github } from 'lucide-react';
 import Fuse from 'fuse.js';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -425,6 +425,15 @@ const Index = () => {
                   {subscriptionTier}
                 </Badge>
               )}
+              <a
+                href="https://github.com/ameerbadri/streamflix-app"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <Github className="h-4 w-4" />
+                Code on Github
+              </a>
             </div>
             
             <div className="flex items-center gap-4">
