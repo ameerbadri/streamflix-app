@@ -2,6 +2,32 @@
 
 This document contains structured prompts to rebuild the complete movie streaming platform from scratch. Follow these prompts in order for a systematic rebuild.
 
+## Prerequisites: Supabase Setup Decision
+
+### Initial Setup Prompt
+```
+Before starting the rebuild, determine your Supabase setup preference:
+
+Option A: Create New Supabase Project
+- I need to create a completely new Supabase project from scratch
+- Set up new database, authentication, and edge functions
+- Configure all tables, RLS policies, and triggers from the beginning
+
+Option B: Use Existing Supabase Project
+- I have an existing Supabase project with the required infrastructure
+- Please provide your Supabase project credentials:
+  - Project URL
+  - Anon Key
+  - Service Role Key (for edge functions)
+- I understand the existing database schema and edge functions will be used
+
+If Option B is selected, ensure your existing Supabase project has:
+- Authentication configured
+- Required database tables (movies, profiles, subscribers, etc.)
+- Edge functions for checkout, subscription management, etc.
+- Proper RLS policies for security
+```
+
 ## Phase 1: Project Foundation
 
 ### Prompt 1: Initialize Project Structure
@@ -15,43 +41,121 @@ Create a new React + TypeScript project using Vite with the following specificat
 - Set up a tailwind.config.ts with custom design tokens
 ```
 
-### Prompt 2: Design System Setup
+### Prompt 2: Design System & Visual Identity
 ```
-Create a comprehensive design system with:
-- Dark/light theme support using CSS variables
-- HSL color palette with semantic tokens (primary, secondary, accent, background, foreground, etc.)
-- Typography scale with custom fonts
-- Spacing and border radius tokens
-- Custom gradients and shadows for a modern look
-- Animation utilities and transitions
-Configure all colors to use HSL format in both index.css and tailwind.config.ts
+Create a premium Netflix-inspired streaming platform design with:
+
+**Visual Design Philosophy:**
+- Modern, cinematic dark theme as primary with elegant light mode support
+- Rich, immersive experience with high-quality imagery and smooth animations
+- Professional streaming service aesthetic with premium feel
+- Clean, content-focused layout that showcases movies beautifully
+
+**Color Palette (HSL format required):**
+- Primary: Deep cinematic red/burgundy for accents and CTAs
+- Secondary: Rich charcoal/midnight blue for backgrounds
+- Accent: Gold/amber for premium subscription indicators
+- Neutral: Sophisticated grays with proper contrast ratios
+- Success/Error: Muted greens and reds that fit the cinematic theme
+
+**Typography:**
+- Modern sans-serif primary font (Inter, Poppins, or similar)
+- Clear hierarchy with readable sizes for movie titles, descriptions, metadata
+- Proper spacing and line heights for both desktop and mobile
+
+**Component Design Patterns:**
+- Glass morphism effects for overlays and modals
+- Subtle gradient overlays on hero sections
+- Rounded corners with consistent border radius scale
+- Shadow system that creates depth without overwhelming
+- Smooth micro-interactions and hover states
+
+**Layout Principles:**
+- Grid-based movie galleries with responsive breakpoints
+- Full-width hero sections with background movie imagery
+- Sticky navigation with transparent-to-solid transition on scroll
+- Card-based design for movie items with hover elevation
+- Proper spacing scale for consistent visual rhythm
+
+Configure all colors in HSL format in both index.css and tailwind.config.ts for proper theming support.
 ```
 
 ## Phase 2: Backend Infrastructure
 
-### Prompt 3: Supabase Project Setup
+### Prompt 3: Supabase Integration Setup
 ```
-Set up a Supabase project with:
-- Create a new Supabase project
-- Configure environment variables for URL and anon key
-- Set up the Supabase client in src/integrations/supabase/client.ts
+**IMPORTANT: Use existing Supabase infrastructure if available, or create new as needed.**
+
+Configure Supabase integration following these patterns:
+- Use the existing Supabase client from src/integrations/supabase/client.ts
+- Configure environment variables for URL and anon key in .env.example
 - Implement proper error handling for missing environment variables
 - Configure auth settings with localStorage persistence and auto-refresh
+- Follow existing Supabase design patterns:
+  * Use supabase.from() for database queries
+  * Use supabase.auth for authentication
+  * Use supabase.functions.invoke() for edge functions
+  * Always handle errors properly with try/catch
+  * Use RLS policies for data security
+  * Use TypeScript types from src/integrations/supabase/types.ts
+
+**Required Integration Points:**
+- Authentication: supabase.auth.signUp(), signInWithPassword(), signOut()
+- Database: Use existing tables and RLS policies
+- Edge Functions: Follow existing edge function patterns
+- Real-time: Configure for live data updates if needed
 ```
 
-### Prompt 4: Database Schema Design
+### Prompt 4: Database Schema & Backend API Architecture
 ```
-Design and implement the complete database schema with these tables:
-- movies (id, title, description, poster_url, trailer_url, video_url, genre[], release_year, duration_minutes, rating, subscription_tier, timestamps)
-- profiles (id, user_id, email, display_name, avatar_url, timestamps)
-- cast_members (id, movie_id, name, character_name, profile_picture_url, tmdb_person_id, order_position, timestamps)
-- crew_members (id, movie_id, name, job, department, profile_picture_url, tmdb_person_id, timestamps)
-- watchlist (id, user_id, movie_id, created_at)
-- user_ratings (id, user_id, movie_id, rating, timestamps)
-- viewing_history (id, user_id, movie_id, progress_seconds, completed, watched_at)
-- subscribers (id, user_id, email, stripe_customer_id, subscribed, subscription_tier, subscription_end, timestamps)
+**CRITICAL: Use existing Supabase database schema and extend as needed.**
 
-Include proper RLS policies for each table and create triggers for automatic timestamp updates.
+**Existing Database Tables (Reference for integration):**
+
+**movies table:**
+- id (uuid, primary key)
+- title (text, required)
+- description (text)
+- poster_url (text)
+- trailer_url (text)
+- video_url (text)
+- genre (text array)
+- release_year (integer)
+- duration_minutes (integer)
+- rating (numeric)
+- subscription_tier (text, default: 'Basic')
+- created_at, updated_at (timestamps)
+
+**profiles table:**
+- id (uuid, primary key)
+- user_id (uuid, references auth.users)
+- email (text, required)
+- display_name (text)
+- avatar_url (text)
+- created_at, updated_at (timestamps)
+
+**subscribers table:**
+- id (uuid, primary key)
+- user_id (uuid, references auth.users)
+- email (text, unique, required)
+- stripe_customer_id (text)
+- subscribed (boolean, default: false)
+- subscription_tier (text)
+- subscription_end (timestamp)
+- created_at, updated_at (timestamps)
+
+**Additional required tables:**
+- cast_members, crew_members, watchlist, user_ratings, viewing_history
+
+**RLS Policies Pattern:**
+- Users can only access their own data (profiles, watchlist, ratings, viewing_history)
+- Movies and cast/crew are publicly readable
+- Subscribers table accessible by user_id or email match
+- Edge functions use service role key to bypass RLS for administrative operations
+
+**Required Database Triggers:**
+- Auto-update updated_at columns on record changes
+- Auto-create profile on user signup (handle_new_user function)
 ```
 
 ### Prompt 5: Authentication System
@@ -170,16 +274,49 @@ Build subscription-related pages:
 
 ## Phase 5: Stripe Integration
 
-### Prompt 14: Stripe Subscription Setup
+### Prompt 14: Stripe Subscription Setup with Edge Functions API
 ```
-Implement Stripe subscription system:
-- Create checkout edge function for subscription creation
-- Implement subscription status checking function
-- Customer portal edge function for subscription management
-- Database integration for subscriber tracking
-- Subscription tier validation
-- Proper error handling and logging
-- Test mode configuration
+**CRITICAL: Use existing Supabase edge functions architecture patterns.**
+
+**Required Edge Functions with API Signatures:**
+
+**1. create-checkout Function:**
+```typescript
+// POST /functions/v1/create-checkout
+// Headers: Authorization: Bearer <user-token>
+// Request Body: { priceId?: string, successUrl?: string, cancelUrl?: string }
+// Response: { url: string } | { error: string }
+```
+
+**2. check-subscription Function:**
+```typescript
+// POST /functions/v1/check-subscription
+// Headers: Authorization: Bearer <user-token>
+// Request Body: {} (empty)
+// Response: { 
+//   subscribed: boolean, 
+//   subscription_tier: string | null, 
+//   subscription_end: string | null 
+// } | { error: string }
+```
+
+**3. customer-portal Function:**
+```typescript
+// POST /functions/v1/customer-portal
+// Headers: Authorization: Bearer <user-token>
+// Request Body: { returnUrl?: string }
+// Response: { url: string } | { error: string }
+```
+
+**Implementation Requirements:**
+- All edge functions must use CORS headers for web app compatibility
+- Use Supabase service role key for database operations (bypass RLS)
+- Implement proper error handling and logging for debugging
+- Use existing Stripe secret key from Supabase secrets
+- Follow existing edge function patterns in supabase/functions/
+- Database integration: Update subscribers table with subscription status
+- Subscription tier validation based on Stripe price IDs
+- Test mode configuration with Stripe test keys
 ```
 
 ### Prompt 15: Subscription Management
